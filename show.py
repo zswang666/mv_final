@@ -1,30 +1,28 @@
 import cv2
 
-img = cv2.imread('img.jpg')
+img = cv2.imread('img_crop.jpg')
 oh, ow, oc = img.shape
-h = 400
-w = 400
+rh = h = 200
+rw = w = 200
 img_resized = img
 img_arr = []
 while True:
-    h, w = int(h * (129/128)), int(w * (129/128))
-    if h >= oh:
-        h = 400
-        w = 400
+    rh, rw = int(rh * (65/64)), int(rw * (65/64))
+    print(h, w)
+    if rh >= oh:
         break
-    ci, cj = h // 2, w //2
-    img_resized = cv2.resize(img, (h, w), interpolation=cv2.INTER_AREA)
-    img_resized = img_resized[ci - 200: ci + 200, cj - 200:cj + 200]
+    ci, cj = rh // 2, rw //2
+    img_resized = cv2.resize(img, (rh, rw), interpolation=cv2.INTER_AREA)
+    img_resized = img_resized[ci - h//2: ci + h//2, cj - w // 2:cj + w // 2]
     img_arr.append(img_resized)
-    #print(img_resized.shape)
     cv2.imshow('img', img_resized)
     cv2.waitKey(1)
 
 fps = 30
-capSize = (400, 400) # this is the size of my source video
+capSize = (h, w) # this is the size of my source video
 #fourcc = cv2.cv.CV_FOURCC('m', 'p', '4', 'v') # note the lower case
 #fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-vout = cv2.VideoWriter('test.mp4',cv2.VideoWriter_fourcc(*'XVID'),fps,(400, 400))
+vout = cv2.VideoWriter('test.mp4',cv2.VideoWriter_fourcc(*'XVID'),fps,(h, w))
 #vout = cv2.VideoWriter()
 #success = vout.open('test.mov',fourcc,fps,capSize,True) 
 for i in range(len(img_arr)):
