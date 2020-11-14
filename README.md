@@ -7,7 +7,7 @@ Final project of 6.801/6.866 Machine Vision
   * `pip install mlagents-envs`
   * `pip install gym_unity`
 * Get Unity build
-  * Download from [here]() to `env/`
+  * Download from [here](https://drive.google.com/drive/folders/1kw6Mc1XH4kpysUhAgfOJmEzQpdKhyrY7?usp=sharing) to `env/`
   * Decompress the file and it should look like
     ```
     env/
