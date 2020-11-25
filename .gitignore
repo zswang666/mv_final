@@ -4,11 +4,14 @@ MV_Final/Temp/
 MV_Final/Library/
 MV_Final/Assets/Standard Assets/
 MV_Final/Assets/_Bad_Raccoon/
+MV_Final/obj/
 
 # Unity3D generated meta files
 *.pidb.meta
 *.pdb.meta
 *.mdb.meta
+*.cs.meta
+*.meta
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
