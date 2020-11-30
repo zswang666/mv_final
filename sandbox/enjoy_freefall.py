@@ -14,10 +14,13 @@ UNITY_STEP_FREQ = 50 # hz
 # setup environment
 mass = 1.0
 thrust_multiplier = 30.0
+action_mode = [0.0, 1.0][0] # thrust control (0.0) / velocity control (1.0)
 if sys.platform == "win32":
     env_build = "../env/FreeFall/windows/FreeFall.exe"
 elif sys.platform == "linux":
-    env_build == "../env/FlyCamera/linux/FreeFall.x86_64"
+    env_build = "../env/FlyCamera/linux/FreeFall.x86_64"
+elif sys.platform == "darwin":
+    env_build = "../env/FreeFall/mac.app"
 else:
     raise AttributeError("{} platform is not supported.".format(sys.platform))
 channel = EnvironmentParametersChannel()
@@ -25,6 +28,7 @@ unity_env = UnityEnvironment(env_build, side_channels=[channel])
 env = UnityToGymWrapper(unity_env, uint8_visual=True, allow_multiple_obs=True)
 channel.set_float_parameter("mass", mass)
 channel.set_float_parameter("thrust_multiplier", thrust_multiplier)
+channel.set_float_parameter("action_mode", action_mode)
 # NOTE: you can also set agent's starting position through position.x, position.y, position.z
 
 # interface

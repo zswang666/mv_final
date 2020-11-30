@@ -11,12 +11,15 @@ from mlagents_envs.side_channel.environment_parameters_channel import Environmen
 if sys.platform == 'win32':
     env_build = "../env/FlyCamera/windows/FlyCamera.exe"
 elif sys.platform == 'linux':
-    env_build == "../env/FlyCamera/linux/FlyCamera.x86_64"
+    env_build = "../env/FlyCamera/linux/FlyCamera.x86_64"
+elif sys.platform == "darwin":
+    env_build = "../env/FlyCamera/mac.app"
 else:
     raise AttributeError("{} platform is not supported.".format(sys.platform))
 channel = EnvironmentParametersChannel()
 unity_env = UnityEnvironment(env_build, side_channels=[channel])
-channel.set_float_parameter("keySpeed", 10.0) # TODO: no effect
+channel.set_float_parameter("key_speed", 10.0)
+channel.set_float_parameter("cam_sens", 0.25)
 env = UnityToGymWrapper(unity_env, uint8_visual=True)
 
 # interface

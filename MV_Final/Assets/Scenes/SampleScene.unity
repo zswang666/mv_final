@@ -902,8 +902,6 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  keySpeed: 10
-  camSens: 0.25
 --- !u!114 &1165735680
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -11,9 +11,10 @@ public class FlyCameraAgent : Agent
         space : Moves camera on X and Z axis only.  So camera doesn't gain any height
     */
 
+    EnvironmentParameters m_ResetParams;
 
-    public float keySpeed = 10.0f; // regular speed
-    public float camSens = 0.25f; // How sensitive it with mouse
+    private float camSens = 0.25f; // How sensitive it with mouse
+    private float keySpeed = 10.0f; // regular speed
 
     Vector3 m_LastMouse = new Vector3(255, 255, 255); // kind of in the middle of the screen, rather than at the top (play)
     Vector3 m_DeltaMouse = new Vector3(0.0f, 0.0f, 0.0f);
@@ -22,6 +23,7 @@ public class FlyCameraAgent : Agent
     public override void Initialize()
     {
         Debug.Log("Initialize agent.");
+        m_ResetParams = Academy.Instance.EnvironmentParameters;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -65,5 +67,8 @@ public class FlyCameraAgent : Agent
         // Fixed starting pose
         transform.position = new Vector3(-120.9f, 10.0f, 792.7f);
         transform.rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+
+        keySpeed = m_ResetParams.GetWithDefault("key_speed", 10.0f);
+        camSens = m_ResetParams.GetWithDefault("cam_sens", 0.25f);
     }
 }

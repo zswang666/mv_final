@@ -9,7 +9,7 @@ public class FreeFallAgent : Agent
 
     private Rigidbody m_RigidBody;
     private float m_ThrustMultiplier;
-
+    private float m_ActionMode;
 
     public override void Initialize()
     {
@@ -30,11 +30,15 @@ public class FreeFallAgent : Agent
         /* Convert action to agent motion */
         var thrust = new Vector3(0.0f, m_ThrustMultiplier * vectorAction[0], 0.0f);
 
-        //float prev_velo_y = m_RigidBody.velocity.y;
-        m_RigidBody.AddForce(thrust);
-        //float curr_velo_y = m_RigidBody.velocity.y;
-        //float comp_velo_y = prev_velo_y + (thrust.y / m_RigidBody.mass - 9.81f) * (1.0f / 50.0f);
-        //Debug.Log(curr_velo_y + ", " + comp_velo_y + " | " + Mathf.Abs(curr_velo_y - comp_velo_y));
+        if (m_ActionMode == 0.0f)
+        {
+            m_RigidBody.AddForce(thrust);
+        }
+        else
+        {
+            m_RigidBody.velocity = thrust;
+        }
+        
 
         var end_episode = m_ResetParams.GetWithDefault("end_episode", 0.0f);
         if (end_episode > 0.0f)
@@ -63,5 +67,6 @@ public class FreeFallAgent : Agent
 
         m_RigidBody.mass = m_ResetParams.GetWithDefault("mass", 1.0f);
         m_ThrustMultiplier = m_ResetParams.GetWithDefault("thrust_multiplier", 10.0f);
+        m_ActionMode = m_ResetParams.GetWithDefault("action_mode", 0.0f);
     }
 }
