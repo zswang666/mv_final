@@ -11,6 +11,9 @@ public class FreeFallAgent : Agent
     private float m_ThrustMultiplier;
     private float m_ActionMode;
 
+    public GameObject m_DustStorm;
+    private float m_DustStormEnable;
+
     public override void Initialize()
     {
         Debug.Log("Initialize agent.");
@@ -69,5 +72,11 @@ public class FreeFallAgent : Agent
         m_RigidBody.mass = m_ResetParams.GetWithDefault("mass", 1.0f);
         m_ThrustMultiplier = m_ResetParams.GetWithDefault("thrust_multiplier", 10.0f);
         m_ActionMode = m_ResetParams.GetWithDefault("action_mode", 0.0f);
+        
+        m_DustStormEnable = m_ResetParams.GetWithDefault("dust_storm.enable", 0.0f);
+        m_DustStorm.SetActive(m_DustStormEnable > 0.0f);
+        m_DustStorm.transform.position = new Vector3(position.x, position.y-16.4f, position.z);
+        var main = m_DustStorm.GetComponent<ParticleSystem>().main;
+        main.startSizeMultiplier = m_ResetParams.GetWithDefault("dust_storm.start_size_multiplier", 25.0f);
     }
 }
