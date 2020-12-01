@@ -12,7 +12,10 @@ public class FreeFallAgent : Agent
     private float m_ActionMode;
 
     public GameObject m_DustStorm;
-    private float m_DustStormEnable;
+    private bool m_DustStormEnable;
+
+    private bool m_WindZoneEnable;
+    private Vector3 m_WindZoneForce;
 
     public override void Initialize()
     {
@@ -26,13 +29,18 @@ public class FreeFallAgent : Agent
         // Camera sensor specified with GUI
         // get speed
         sensor.AddObservation(m_RigidBody.velocity); // 3-dim
-        // get distance to the ground
     }
 
     public override void OnActionReceived(float[] vectorAction)
     {
         /* Convert action to agent motion */
         var thrust = new Vector3(0.0f, m_ThrustMultiplier * vectorAction[0], 0.0f);
+
+        if (m_WindZoneEnable)
+        {
+            Debug.Log(m_WindZoneForce);
+            m_RigidBody.AddForce(m_WindZoneForce);
+        }
 
         if (m_ActionMode == 0.0f)
         {
@@ -73,10 +81,15 @@ public class FreeFallAgent : Agent
         m_ThrustMultiplier = m_ResetParams.GetWithDefault("thrust_multiplier", 10.0f);
         m_ActionMode = m_ResetParams.GetWithDefault("action_mode", 0.0f);
         
-        m_DustStormEnable = m_ResetParams.GetWithDefault("dust_storm.enable", 0.0f);
-        m_DustStorm.SetActive(m_DustStormEnable > 0.0f);
+        m_DustStormEnable = m_ResetParams.GetWithDefault("dust_storm.enable", 0.0f) > 0.0f;
+        m_DustStorm.SetActive(m_DustStormEnable);
         m_DustStorm.transform.position = new Vector3(position.x, position.y-16.4f, position.z);
         var main = m_DustStorm.GetComponent<ParticleSystem>().main;
         main.startSizeMultiplier = m_ResetParams.GetWithDefault("dust_storm.start_size_multiplier", 25.0f);
+
+        m_WindZoneEnable = m_ResetParams.GetWithDefault("wind_zone.enable", 0.0f) > 0.0f;
+        m_WindZoneForce = new Vector3(m_ResetParams.GetWithDefault("wind_zone.force.x", 1.0f),
+                                      m_ResetParams.GetWithDefault("wind_zone.force.y", 0.0f),
+                                      m_ResetParams.GetWithDefault("wind_zone.force.z", 1.0f));
     }
 }
