@@ -23,6 +23,7 @@ public class FreeFallAgent : Agent
         // Camera sensor specified with GUI
         // get speed
         sensor.AddObservation(m_RigidBody.velocity); // 3-dim
+        // get distance to the ground
     }
 
     public override void OnActionReceived(float[] vectorAction)
@@ -62,7 +63,7 @@ public class FreeFallAgent : Agent
         position.y = m_ResetParams.GetWithDefault("position.y", 27.4834f);
         position.z = m_ResetParams.GetWithDefault("position.z", 792.7f);
         transform.position = position;
-        transform.rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+        transform.rotation = Quaternion.Euler(90.0f, 0.0f, 0.0f);
         m_RigidBody.velocity = new Vector3();
 
         m_RigidBody.mass = m_ResetParams.GetWithDefault("mass", 1.0f);

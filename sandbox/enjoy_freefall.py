@@ -9,6 +9,8 @@ from mlagents_envs.side_channel.environment_parameters_channel import Environmen
 
 GRAVITY = -9.81
 UNITY_STEP_FREQ = 50 # hz
+RAY_MAX = 1000
+RAY_OFFSET = -0.1446
 
 
 # setup environment
@@ -54,11 +56,17 @@ print("Select matplotlib window. Press arrow keys to move (only up and down). \n
       "Don't use w/s since some keys are conflict with matplotlib default hotkey.\n" +
       "Press q to end game.")
 
+# raycast
+def process_ray(ray_obs):
+     # idk what obs[1][:1] is
+    return ray_obs[2] * RAY_MAX + RAY_OFFSET
+
 # run
 obs = env.reset()
+dist_curr = process_ray(obs[1])
 im = ax.imshow(obs[0])
 plt.tight_layout()
-fig.subplots_adjust(top=0.93)
+fig.subplots_adjust(top=0.898)
 plt.show(block=False)
 img_h, img_w = obs[0].shape[:2]
 done = False
@@ -78,15 +86,23 @@ while not done:
     img = obs[0]
     im.set_data(img)
     
-    if False: # sanity check (current environment lock motion of x and z axes)
+    if False: # sanity check
+        # current environment lock motion of x and z axes
         dt = 1. / UNITY_STEP_FREQ
         acc = act * thrust_multiplier / mass
         next_velo_y = velo[1] + (GRAVITY + acc) * dt
-        velo_y_err = np.absolute(next_velo_y - obs[1][1])
-        print("Velocity error (y-axis) = {}".format(velo_y_err))
-    velo = obs[1]
-    ax.set_title("Velocity = ({:.2f}, {:.2f}, {:.2f})".format(*velo))
+        velo_y_err = np.absolute(next_velo_y - obs[1][4])
+
+        # use velocity to compute distance
+        dist_curr = dist_curr + obs[1][4] * dt
+        dist_err = np.absolute(dist_curr - process_ray(obs[1]))
+
+        print("Velocity error (y-axis) = {}, Distance error = {}".format(velo_y_err, dist_err))
     
+    velo = obs[1][3:]
+    distance_to_ground = process_ray(obs[1])
+    ax.set_title("Velocity = ({:.2f}, {:.2f}, {:.2f})\n Distance to Ground: {:.8f}".format(\
+        *velo, distance_to_ground))
 
     # example of resetting environment
     if False:
