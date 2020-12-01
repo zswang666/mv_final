@@ -17,6 +17,8 @@ public class FreeFallAgent : Agent
     private bool m_WindZoneEnable;
     private Vector3 m_WindZoneForce;
 
+    public GameObject m_Light;
+
     public override void Initialize()
     {
         Debug.Log("Initialize agent.");
@@ -81,17 +83,20 @@ public class FreeFallAgent : Agent
         m_ThrustMultiplier = m_ResetParams.GetWithDefault("thrust_multiplier", 10.0f);
         m_ActionMode = m_ResetParams.GetWithDefault("action_mode", 0.0f);
 
+        // duststorm
         m_DustStormEnable = m_ResetParams.GetWithDefault("dust_storm.enable", 0.0f) > 0.0f;
         m_DustStorm.SetActive(m_DustStormEnable);
         m_DustStorm.transform.position = new Vector3(position.x, position.y - 16.4f, position.z);
         var main = m_DustStorm.GetComponent<ParticleSystem>().main;
         main.startSizeMultiplier = m_ResetParams.GetWithDefault("dust_storm.start_size_multiplier", 25.0f);
 
+        // wind
         m_WindZoneEnable = m_ResetParams.GetWithDefault("wind_zone.enable", 0.0f) > 0.0f;
         m_WindZoneForce = new Vector3(m_ResetParams.GetWithDefault("wind_zone.force.x", 1.0f),
                                       m_ResetParams.GetWithDefault("wind_zone.force.y", 0.0f),
                                       m_ResetParams.GetWithDefault("wind_zone.force.z", 1.0f));
 
+        // freeze rigid body
         if (m_ResetParams.GetWithDefault("rigid_body.freeze_position.x", 0.0f) > 0.0f)
         {
             m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezePositionX;
@@ -116,5 +121,10 @@ public class FreeFallAgent : Agent
         {
             m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezeRotationZ;
         }
+
+        // cloud shadow
+        m_Light.GetComponent<EntroPi.CloudShadows>().enabled = m_ResetParams.GetWithDefault("cloud_shadow.enable", 0.0f) > 0.0f;
+        m_Light.GetComponent<EntroPi.CloudShadows>().SpeedMultiplier = m_ResetParams.GetWithDefault("cloud_shadow.speed_multiplier", 5.0f);
+        m_Light.GetComponent<EntroPi.CloudShadows>().CoverageModifier = m_ResetParams.GetWithDefault("cloud_shadow.coverage_modifier", 0.0f);
     }
 }

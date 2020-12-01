@@ -216,6 +216,7 @@ GameObject:
   m_Component:
   - component: {fileID: 77150563}
   - component: {fileID: 77150562}
+  - component: {fileID: 77150564}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -239,7 +240,7 @@ Light:
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
-  m_CookieSize: 10
+  m_CookieSize: 100
   m_Shadows:
     m_Type: 2
     m_Resolution: -1
@@ -298,6 +299,30 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 21.6, y: -261.4, z: 0}
+--- !u!114 &77150564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 77150561}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ceb7dc61d7899947a6040600e0562c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PreviewInEditor: 1
+  m_ProjectMode: 0
+  m_CloudLayers: {fileID: 11400000, guid: 33b8a549f70d3d340ac1c0eca48b64a3, type: 2}
+  m_WorldSize: 100
+  m_RenderTextureResolution: 256
+  m_OpacityMultiplier: 1
+  m_CoverageModifier: 0
+  m_SoftnessModifier: 0
+  m_SpeedMultiplier: 5
+  m_DirectionModifier: 0
+  m_HorizonAngleThreshold: 10
+  m_HorizonAngleFade: 10
 --- !u!1 &112174134
 GameObject:
   m_ObjectHideFlags: 0
@@ -679,6 +704,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   m_DustStorm: {fileID: 1764715952}
+  m_Light: {fileID: 77150561}
 --- !u!1 &721069378
 GameObject:
   m_ObjectHideFlags: 0
@@ -1433,6 +1459,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Particle_Cloud_Atmos_A
       objectReference: {fileID: 0}
+    - target: {fileID: 1733099557471172, guid: 66f7129f685bccb4082b66a0cc4c3c99, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4130049115745352, guid: 66f7129f685bccb4082b66a0cc4c3c99, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1521,6 +1551,11 @@ PrefabInstance:
         type: 3}
       propertyPath: ShapeModule.m_Scale.z
       value: 1500
+      objectReference: {fileID: 0}
+    - target: {fileID: 8864828539825658011, guid: 66f7129f685bccb4082b66a0cc4c3c99,
+        type: 3}
+      propertyPath: LightsModule.enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 66f7129f685bccb4082b66a0cc4c3c99, type: 3}
