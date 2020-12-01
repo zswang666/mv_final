@@ -315,7 +315,7 @@ MonoBehaviour:
   m_ProjectMode: 0
   m_CloudLayers: {fileID: 11400000, guid: 33b8a549f70d3d340ac1c0eca48b64a3, type: 2}
   m_WorldSize: 100
-  m_RenderTextureResolution: 256
+  m_RenderTextureResolution: 4096
   m_OpacityMultiplier: 1
   m_CoverageModifier: 0
   m_SoftnessModifier: 0

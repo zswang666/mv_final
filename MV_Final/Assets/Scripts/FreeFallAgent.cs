@@ -18,6 +18,10 @@ public class FreeFallAgent : Agent
     private Vector3 m_WindZoneForce;
 
     public GameObject m_Light;
+    private bool m_rotationalLightEnable;
+    private float m_rotationalLightInterval;
+    private float m_rotationalLightStep;
+    private Vector2 m_rotationalLightBound;
 
     public override void Initialize()
     {
@@ -51,6 +55,25 @@ public class FreeFallAgent : Agent
         else
         {
             m_RigidBody.velocity = thrust;
+        }
+
+        // update rotational light
+        if (m_rotationalLightEnable)
+        {
+            float new_light_rotation_x = m_Light.transform.rotation.eulerAngles.x + m_rotationalLightStep;
+            if (new_light_rotation_x > m_rotationalLightBound.y)
+            {
+                new_light_rotation_x = m_rotationalLightBound.y;
+                m_rotationalLightStep = -1.0f * m_rotationalLightStep;
+            }
+            else if (new_light_rotation_x < m_rotationalLightBound.x)
+            {
+                new_light_rotation_x = m_rotationalLightBound.x;
+                m_rotationalLightStep = -1.0f * m_rotationalLightStep;
+            }
+            m_Light.transform.rotation = Quaternion.Euler(new_light_rotation_x, 
+                                                          m_Light.transform.rotation.eulerAngles.y, 
+                                                          m_Light.transform.rotation.eulerAngles.z);
         }
         
 
@@ -126,5 +149,14 @@ public class FreeFallAgent : Agent
         m_Light.GetComponent<EntroPi.CloudShadows>().enabled = m_ResetParams.GetWithDefault("cloud_shadow.enable", 0.0f) > 0.0f;
         m_Light.GetComponent<EntroPi.CloudShadows>().SpeedMultiplier = m_ResetParams.GetWithDefault("cloud_shadow.speed_multiplier", 5.0f);
         m_Light.GetComponent<EntroPi.CloudShadows>().CoverageModifier = m_ResetParams.GetWithDefault("cloud_shadow.coverage_modifier", 0.0f);
+
+        // lighting
+        m_Light.transform.position = new Vector3(0.0f, 3.0f, 0.0f);
+        m_Light.transform.rotation = Quaternion.Euler(21.6f, -261.4f, 0.0f);
+        m_rotationalLightEnable = m_ResetParams.GetWithDefault("rotational_light.enable", 0.0f) > 0.0f;
+        m_rotationalLightInterval = m_ResetParams.GetWithDefault("rotational_light.interval", 10.0f);
+        m_rotationalLightStep = m_ResetParams.GetWithDefault("rotational_light.step", 0.1f);
+        m_rotationalLightBound.x = m_Light.transform.rotation.eulerAngles.x - m_rotationalLightInterval;
+        m_rotationalLightBound.y = m_Light.transform.rotation.eulerAngles.x + m_rotationalLightInterval;
     }
 }
