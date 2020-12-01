@@ -80,10 +80,10 @@ public class FreeFallAgent : Agent
         m_RigidBody.mass = m_ResetParams.GetWithDefault("mass", 1.0f);
         m_ThrustMultiplier = m_ResetParams.GetWithDefault("thrust_multiplier", 10.0f);
         m_ActionMode = m_ResetParams.GetWithDefault("action_mode", 0.0f);
-        
+
         m_DustStormEnable = m_ResetParams.GetWithDefault("dust_storm.enable", 0.0f) > 0.0f;
         m_DustStorm.SetActive(m_DustStormEnable);
-        m_DustStorm.transform.position = new Vector3(position.x, position.y-16.4f, position.z);
+        m_DustStorm.transform.position = new Vector3(position.x, position.y - 16.4f, position.z);
         var main = m_DustStorm.GetComponent<ParticleSystem>().main;
         main.startSizeMultiplier = m_ResetParams.GetWithDefault("dust_storm.start_size_multiplier", 25.0f);
 
@@ -91,5 +91,30 @@ public class FreeFallAgent : Agent
         m_WindZoneForce = new Vector3(m_ResetParams.GetWithDefault("wind_zone.force.x", 1.0f),
                                       m_ResetParams.GetWithDefault("wind_zone.force.y", 0.0f),
                                       m_ResetParams.GetWithDefault("wind_zone.force.z", 1.0f));
+
+        if (m_ResetParams.GetWithDefault("rigid_body.freeze_position.x", 0.0f) > 0.0f)
+        {
+            m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezePositionX;
+        }
+        if (m_ResetParams.GetWithDefault("rigid_body.freeze_position.y", 0.0f) > 0.0f)
+        {
+            m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezePositionY;
+        }
+        if (m_ResetParams.GetWithDefault("rigid_body.freeze_position.z", 0.0f) > 0.0f)
+        {
+            m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezePositionZ;
+        }
+        if (m_ResetParams.GetWithDefault("rigid_body.freeze_rotation.x", 1.0f) > 0.0f)
+        {
+            m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezeRotationX;
+        }
+        if (m_ResetParams.GetWithDefault("rigid_body.freeze_rotation.y", 1.0f) > 0.0f)
+        {
+            m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezeRotationY;
+        }
+        if (m_ResetParams.GetWithDefault("rigid_body.freeze_rotation.z", 1.0f) > 0.0f)
+        {
+            m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezeRotationZ;
+        }
     }
 }
