@@ -1,18 +1,9 @@
-import sys
+from collections import deque
+
 import numpy as np
-import matplotlib.pyplot as plt
-from attrdict import AttrDict
-
-from mlagents_envs.environment import UnityEnvironment
-from gym_unity.envs import UnityToGymWrapper
-from mlagents_envs.side_channel.environment_parameters_channel import EnvironmentParametersChannel
-
-from wrappers import make_simple_env, MatplotlibWrapper
 
 from ttc import solve_ttc_multiscale, solve_ttc
 from ttc.util import rgb2gray, uniform_blur, restrict
-
-from collections import deque
 
 class TTCController(object):
     
@@ -20,11 +11,13 @@ class TTCController(object):
             downsample_size=5, 
             default_act=0.0, 
             smooth_window=10,
-            max_velocity=1.0):
+            max_velocity=1.0,
+            velocity_limit=0):
         self.a = a
         self.downsample_size = downsample_size
         self.default_act = default_act
         self.max_velocity = max_velocity
+        self.velocity_limit = velocity_limit
         self.recent_ttcs = deque(maxlen=smooth_window)
         self.prev_frame = None        
     
@@ -42,42 +35,13 @@ class TTCController(object):
             T, x0, y0, Ex, Ey, Et, v = solve_ttc_multiscale(self.prev_frame, frame)
             self.recent_ttcs.append(T)
             smooth_T = np.mean(self.recent_ttcs)
-            act = np.clip(-2 * self.a * smooth_T, -self.max_velocity, 0)
+            act = np.clip(-2 * self.a * smooth_T, -self.max_velocity, self.velocity_limit)
             print('TTC={}, Smooth TTC={}, act={}'.format(T, np.mean(self.recent_ttcs), act))
         else:
-            T = np.inf
+            x0 = y0 = T = np.inf            
             act = self.default_act
         self.prev_frame = frame
         
-        return act, {'TTC': T}
+        return act, {'TTC': T, 'V*': act, 'x0': x0, 'y0': y0}
 
-env = make_simple_env()
 
-assert isinstance(env, MatplotlibWrapper)
-
-fig, ax = env.fig, env.ax 
-
-obs = env.reset()
-
-img_h, img_w = obs[0].shape[:2]
-
-done = False
-timestep = 0
-velocity = np.zeros((3,))
-
-controller = TTCController()
-
-while not done:
-    act, ctrl_info = controller.step(obs[0])
-    obs, _, _, _ = env.step(act)
-    
-    # For logging
-    velocity = obs[1][3:]
-    distance_to_ground = obs[-1]
-    ax.set_title("Velocity = ({:.2f}, {:.2f}, {:.2f})\n Distance to Ground: {:.8f} TTC = {:.3f}".format(\
-        *velocity, distance_to_ground, ctrl_info['TTC']))
-    
-    timestep += 1
-
-    if distance_to_ground < 1.0:
-        obs = env.reset()
