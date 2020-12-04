@@ -52,5 +52,5 @@ config = AttrDict({
 
 env = make_unity_env(config)
 run_experiment(env,
-    logger_kwargs={'base_dir': './results/Freefall'},
+    logger_kwargs={'base_dir': './results/Basic-Freefall'},
     controller_kwargs={'disable_control': True})

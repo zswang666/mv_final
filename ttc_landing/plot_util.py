@@ -14,8 +14,8 @@ def load_pickle(path):
     with open(path, 'rb') as f:
         return pickle.load(f)
 
-def plot_distance(logfile, ax=None):
-    ax = sns.lineplot(x='Timestep', y='distance', data=logfile, ax=None)
+def plot_distance(logfile, ax=None, hue=None):
+    ax = sns.lineplot(x='Timestep', y='distance', hue=hue, data=logfile, ax=None)
     ax.set_title('Distance (t)')
     return ax
 
