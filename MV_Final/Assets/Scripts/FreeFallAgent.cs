@@ -8,14 +8,15 @@ public class FreeFallAgent : Agent
     EnvironmentParameters m_ResetParams;
 
     private Rigidbody m_RigidBody;
-    private float m_ThrustMultiplier;
+    private float m_ControlMultiplier;
     private float m_ActionMode;
 
     public GameObject m_DustStorm;
     private bool m_DustStormEnable;
 
     private bool m_WindZoneEnable;
-    private Vector3 m_WindZoneForce;
+    private Vector3 m_WindZoneForceLow;
+    private Vector3 m_WindZoneForceHigh;
 
     public GameObject m_Light;
     private bool m_rotationalLightEnable;
@@ -35,26 +36,41 @@ public class FreeFallAgent : Agent
         // Camera sensor specified with GUI
         // get speed
         sensor.AddObservation(m_RigidBody.velocity); // 3-dim
+        sensor.AddObservation(m_RigidBody.angularVelocity);
     }
 
     public override void OnActionReceived(float[] vectorAction)
     {
         /* Convert action to agent motion */
-        var thrust = new Vector3(0.0f, m_ThrustMultiplier * vectorAction[0], 0.0f);
-
         if (m_WindZoneEnable)
         {
-            Debug.Log(m_WindZoneForce);
-            m_RigidBody.AddForce(m_WindZoneForce);
+            var windZoneForce = new Vector3(Random.Range(m_WindZoneForceLow[0], m_WindZoneForceHigh[0]),
+                                            Random.Range(m_WindZoneForceLow[1], m_WindZoneForceHigh[1]),
+                                            Random.Range(m_WindZoneForceLow[2], m_WindZoneForceHigh[2]));
+            m_RigidBody.AddForce(windZoneForce);
         }
 
         if (m_ActionMode == 0.0f)
         {
+            var thrust = new Vector3(m_ControlMultiplier * vectorAction[0], 
+                                     m_ControlMultiplier * vectorAction[1],
+                                     m_ControlMultiplier * vectorAction[2]);
+            var torque = new Vector3(m_ControlMultiplier * vectorAction[3],
+                                     m_ControlMultiplier * vectorAction[4],
+                                     m_ControlMultiplier * vectorAction[5]);
             m_RigidBody.AddForce(thrust);
+            m_RigidBody.AddTorque(torque);
         }
         else
         {
-            m_RigidBody.velocity = thrust;
+            var velocity = new Vector3(m_ControlMultiplier * vectorAction[0],
+                                       m_ControlMultiplier * vectorAction[1],
+                                       m_ControlMultiplier * vectorAction[2]);
+            var angularVelocity = new Vector3(m_ControlMultiplier * vectorAction[3],
+                                              m_ControlMultiplier * vectorAction[4],
+                                              m_ControlMultiplier * vectorAction[5]);
+            m_RigidBody.velocity = velocity;
+            m_RigidBody.angularVelocity = angularVelocity;
         }
 
         // update rotational light
@@ -88,7 +104,7 @@ public class FreeFallAgent : Agent
     {
         /* Convert keyboard input to action */
         // up and down thrust
-        actionsOut[0] = Input.GetAxis("Vertical");
+        actionsOut[1] = Input.GetAxis("Vertical");
     }
 
     public override void OnEpisodeBegin()
@@ -103,7 +119,7 @@ public class FreeFallAgent : Agent
         m_RigidBody.velocity = new Vector3();
 
         m_RigidBody.mass = m_ResetParams.GetWithDefault("mass", 1.0f);
-        m_ThrustMultiplier = m_ResetParams.GetWithDefault("thrust_multiplier", 10.0f);
+        m_ControlMultiplier = m_ResetParams.GetWithDefault("control_multiplier", 10.0f);
         m_ActionMode = m_ResetParams.GetWithDefault("action_mode", 0.0f);
 
         // duststorm
@@ -115,9 +131,12 @@ public class FreeFallAgent : Agent
 
         // wind
         m_WindZoneEnable = m_ResetParams.GetWithDefault("wind_zone.enable", 0.0f) > 0.0f;
-        m_WindZoneForce = new Vector3(m_ResetParams.GetWithDefault("wind_zone.force.x", 1.0f),
-                                      m_ResetParams.GetWithDefault("wind_zone.force.y", 0.0f),
-                                      m_ResetParams.GetWithDefault("wind_zone.force.z", 1.0f));
+        m_WindZoneForceLow = new Vector3(m_ResetParams.GetWithDefault("wind_zone.force_low.x", -1.0f),
+                                         m_ResetParams.GetWithDefault("wind_zone.force_low.y", 0.0f),
+                                         m_ResetParams.GetWithDefault("wind_zone.force_low.z", -1.0f));
+        m_WindZoneForceHigh = new Vector3(m_ResetParams.GetWithDefault("wind_zone.force_high.x", 1.0f),
+                                          m_ResetParams.GetWithDefault("wind_zone.force_high.y", 0.0f),
+                                          m_ResetParams.GetWithDefault("wind_zone.force_high.z", 1.0f));
 
         // freeze rigid body
         if (m_ResetParams.GetWithDefault("rigid_body.freeze_position.x", 0.0f) > 0.0f)

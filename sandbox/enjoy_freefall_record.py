@@ -133,6 +133,7 @@ while not done:
     key_ws = np.array([False] * 2)
 
     # step in environment
+    import pdb; pdb.set_trace()
     obs, _, _, _ = env.step(act)
     img0 = obs[0]
     img1 = obs[1]

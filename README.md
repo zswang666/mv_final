@@ -24,6 +24,7 @@ Final project of 6.801/6.866 Machine Vision
   * [Standard Assets](https://assetstore.unity.com/packages/essentials/asset-packs/standard-assets-for-unity-2018-4-32351)
   * [3D Realistic Terrain Free](https://assetstore.unity.com/packages/3d/environments/landscapes/3d-realistic-terrain-free-182593)
   * [Unity Cloud Shadows](https://github.com/EntroPi-Games/Unity-Cloud-Shadows/)
+  * [SciFi Enemies and Vehicles](https://assetstore.unity.com/packages/3d/characters/robots/scifi-enemies-and-vehicles-15159)
 
 ## Experiments on TTC landing control in different scenarios
 - Basic
