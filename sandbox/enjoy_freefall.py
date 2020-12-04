@@ -20,7 +20,7 @@ action_mode = [0.0, 1.0][0] # thrust control (0.0) / velocity control (1.0)
 if sys.platform == "win32":
     env_build = "../env/FreeFall/windows/FreeFall.exe"
 elif sys.platform == "linux":
-    env_build = "../env/FlyCamera/linux/FreeFall.x86_64"
+    env_build = "../env/FreeFall/linux/FreeFall.x86_64"
 elif sys.platform == "darwin":
     env_build = "../env/FreeFall/mac.app"
 else:

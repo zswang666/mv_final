@@ -71,7 +71,7 @@ def assign_config(_channel, _config, k_prefix=None):
 
 # setup environment
 if sys.platform == "win32":
-    env_build = "../env/FreeFall/windows/FreeFall.exe"
+    env_build = "../env/FreeFallRecord/windows/FreeFall.exe"
 elif sys.platform == "linux":
     env_build = "../env/FreeFall/linux/FreeFall.x86_64"
 elif sys.platform == "darwin":
@@ -79,7 +79,7 @@ elif sys.platform == "darwin":
 else:
     raise AttributeError("{} platform is not supported.".format(sys.platform))
 channel = EnvironmentParametersChannel()
-unity_env = UnityEnvironment(env_build, side_channels=[channel])
+unity_env = UnityEnvironment(env_build, side_channels=[channel], additional_args=["-batchmode"])
 env = UnityToGymWrapper(unity_env, uint8_visual=True, allow_multiple_obs=True)
 assign_config(channel, config)
 
@@ -98,7 +98,7 @@ def key_press(event): # NOTE: cannot handle multiple key press at the same time
         sys.exit()
     sys.stdout.flush()
 
-fig, ax = plt.subplots()
+fig, axes = plt.subplots(1, 2)
 fig.canvas.mpl_connect('key_press_event', key_press)
 
 # helper
@@ -113,8 +113,9 @@ def process_ray(ray_obs):
 
 # run
 obs = env.reset()
-dist_curr = process_ray(obs[1])
-im = ax.imshow(obs[0])
+dist_curr = process_ray(obs[2])
+im0 = axes[0].imshow(obs[0])
+im1 = axes[1].imshow(obs[1])
 plt.tight_layout()
 fig.subplots_adjust(top=0.898)
 plt.show(block=False)
@@ -133,26 +134,28 @@ while not done:
 
     # step in environment
     obs, _, _, _ = env.step(act)
-    img = obs[0]
-    im.set_data(img)
+    img0 = obs[0]
+    img1 = obs[1]
+    im0.set_data(img0)
+    im1.set_data(img1)
     
     if False: # sanity check
         # current environment lock motion of x and z axes
         dt = 1. / UNITY_STEP_FREQ
         acc = act * thrust_multiplier / mass
         next_velo_y = velo[1] + (GRAVITY + acc) * dt
-        velo_y_err = np.absolute(next_velo_y - obs[1][4])
+        velo_y_err = np.absolute(next_velo_y - obs[2][4])
 
         # use velocity to compute distance
-        dist_curr = dist_curr + obs[1][4] * dt
-        dist_err = np.absolute(dist_curr - process_ray(obs[1]))
+        dist_curr = dist_curr + obs[2][4] * dt
+        dist_err = np.absolute(dist_curr - process_ray(obs[2]))
 
         print("Velocity error (y-axis) = {}, Distance error = {}".format(velo_y_err, dist_err))
     
-    velo = obs[1][3:]
-    distance_to_ground = process_ray(obs[1])
-    ax.set_title("Velocity = ({:.2f}, {:.2f}, {:.2f})\n Distance to Ground: {:.8f}".format(\
-        *velo, distance_to_ground))
+    velo = obs[2][3:]
+    distance_to_ground = process_ray(obs[2])
+    axes[0].set_title("Velocity = ({:.2f}, {:.2f}, {:.2f})\n Distance to Ground: {:.8f}".format(\
+                      *velo, distance_to_ground))
 
     # example of resetting environment
     if False:
