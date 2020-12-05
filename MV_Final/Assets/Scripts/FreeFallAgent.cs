@@ -24,6 +24,10 @@ public class FreeFallAgent : Agent
     private float m_rotationalLightStep;
     private Vector2 m_rotationalLightBound;
 
+    public GameObject m_LandingZone;
+    private bool m_LandingZoneEnable;
+    private Vector3 m_LandingZoneOffset;
+
     public override void Initialize()
     {
         Debug.Log("Initialize agent.");
@@ -36,7 +40,15 @@ public class FreeFallAgent : Agent
         // Camera sensor specified with GUI
         // get speed
         sensor.AddObservation(m_RigidBody.velocity); // 3-dim
-        sensor.AddObservation(m_RigidBody.angularVelocity);
+        sensor.AddObservation(m_RigidBody.angularVelocity); // 3-dim
+        if (m_LandingZoneEnable)
+        {
+            sensor.AddObservation(m_LandingZone.transform.position - transform.position);
+        }
+        else
+        {
+            sensor.AddObservation(Vector3.zero);
+        }
     }
 
     public override void OnActionReceived(float[] vectorAction)
@@ -151,15 +163,15 @@ public class FreeFallAgent : Agent
         {
             m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezePositionZ;
         }
-        if (m_ResetParams.GetWithDefault("rigid_body.freeze_rotation.x", 1.0f) > 0.0f)
+        if (m_ResetParams.GetWithDefault("rigid_body.freeze_rotation.x", 0.0f) > 0.0f)
         {
             m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezeRotationX;
         }
-        if (m_ResetParams.GetWithDefault("rigid_body.freeze_rotation.y", 1.0f) > 0.0f)
+        if (m_ResetParams.GetWithDefault("rigid_body.freeze_rotation.y", 0.0f) > 0.0f)
         {
             m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezeRotationY;
         }
-        if (m_ResetParams.GetWithDefault("rigid_body.freeze_rotation.z", 1.0f) > 0.0f)
+        if (m_ResetParams.GetWithDefault("rigid_body.freeze_rotation.z", 0.0f) > 0.0f)
         {
             m_RigidBody.constraints = m_RigidBody.constraints | RigidbodyConstraints.FreezeRotationZ;
         }
@@ -177,5 +189,19 @@ public class FreeFallAgent : Agent
         m_rotationalLightStep = m_ResetParams.GetWithDefault("rotational_light.step", 0.1f);
         m_rotationalLightBound.x = m_Light.transform.rotation.eulerAngles.x - m_rotationalLightInterval;
         m_rotationalLightBound.y = m_Light.transform.rotation.eulerAngles.x + m_rotationalLightInterval;
+
+        // landing zone
+        m_LandingZoneEnable = m_ResetParams.GetWithDefault("landing_zone.enable", 0.0f) > 0.0f;
+        m_LandingZone.SetActive(m_LandingZoneEnable);
+        if (m_LandingZoneEnable)
+        {
+            m_LandingZoneOffset = new Vector3(m_ResetParams.GetWithDefault("landing_zone.offset.x", 31.5f),
+                                              m_ResetParams.GetWithDefault("landing_zone.offset.y", -47.4f),
+                                              m_ResetParams.GetWithDefault("landing_zone.offset.z", 23.5f));
+            Vector3 l_position = m_LandingZoneOffset + transform.position;
+            Vector3 lo_position = m_LandingZone.transform.position;
+            lo_position = l_position;
+            m_LandingZone.GetComponent<LandinigZone>().ResetPose();
+        }
     }
 }

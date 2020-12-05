@@ -17,25 +17,30 @@ RAY_OFFSET = -0.1446
 #### Environment parameters (NOTE: can also be set across episode as they make effect at episode start)
 config = AttrDict({
     "mass": 1.0,
-    "thrust_multiplier": 30.0,
-    "action_mode": [0.0, 1.0][0], # thrust control (0.0) / velocity control (1.0)
+    "control_multiplier": 1.0,
+    "action_mode": [0.0, 1.0][1], # thrust control (0.0) / velocity control (1.0)
     "dust_storm": AttrDict({ # TODO: thicker dust storm not obvious
         "enable": 0.0, # float value other than 0.0 will enable
         "start_size_multiplier": 25.0 # particle size; larger value gives thicker dust storm
     }),
     "wind_zone": AttrDict({ # NOTE: remember to set freeze_position.x/y to false when enabling wind zone
         "enable": 0.0, # float value other than 0.0 will enable
-        "force": AttrDict({ # constant directional wind force over the object
-            "x": 1.0, 
+        "force_low": AttrDict({ # random wind with force subject to uniform[low, high]
+            "x": -10.0, 
             "y": 0.0, # y-axis wind force should always be zero as this is up-and-down direction
-            "z": 1.0,
+            "z": -10.0,
+        }),
+        "force_high": AttrDict({ # constant directional wind force over the object
+            "x": 10.0, 
+            "y": 0.0, # y-axis wind force should always be zero as this is up-and-down direction
+            "z": 10.0,
         })
     }),
     "rigid_body": AttrDict({ 
         "freeze_position": AttrDict({ # float value other than 0.0 is true
-            "x": 1.0,
+            "x": 0.0,
             "y": 0.0, # never fix y translation as we are doing free fall
-            "z": 1.0,
+            "z": 0.0,
         }),
         "freeze_rotation": AttrDict({ # float value other than 0.0 is true
             "x": 1.0,
@@ -49,7 +54,7 @@ config = AttrDict({
         "coverage_modifier": 0.0, # -1.0 ~ 1.0, larger value gives larger coverage of shadow 
     }),
     "rotational_light": AttrDict({ # light rotates about x-axis within +-interval with fixed step size
-        "enable": 1.0, # float value other than 0.0 will enable
+        "enable": 0.0, # float value other than 0.0 will enable
         "interval": 10.0, # light rotate in the range of light_original_rotation +- interval
         "step": 1.0 # larger number gives faster rotating light source
     }),
@@ -57,6 +62,14 @@ config = AttrDict({
         "x": -120.9,
         "y": 27.4834, 
         "z": 792.7
+    }),
+    "landing_zone": AttrDict({
+        "enable":  0.0, # float value other than 0.0 will enable
+        "offset": AttrDict({
+            "x": 31.5,
+            "y": -47.4,
+            "z": 23.5
+        })
     })
 })
 ####
@@ -71,11 +84,11 @@ def assign_config(_channel, _config, k_prefix=None):
 
 # setup environment
 if sys.platform == "win32":
-    env_build = "../env/FreeFallRecord/windows/FreeFall.exe"
+    env_build = "../env/FreeFallVer2/windows/FreeFall.exe"
 elif sys.platform == "linux":
-    env_build = "../env/FreeFall/linux/FreeFall.x86_64"
+    env_build = "../env/FreeFallVer2/linux/FreeFall.x86_64"
 elif sys.platform == "darwin":
-    env_build = "../env/FreeFall/mac.app"
+    env_build = "../env/FreeFallVer2/mac.app"
 else:
     raise AttributeError("{} platform is not supported.".format(sys.platform))
 channel = EnvironmentParametersChannel()
@@ -112,6 +125,13 @@ def process_ray(ray_obs):
     return ray_obs[2] * RAY_MAX + RAY_OFFSET
 
 # run
+# NOTE: action and observation space
+# action is 6DoF: 3-dim thrust / velocity + 3-dim torque / angular velocity
+# angular velocity is in unit rad/s (don't send too large value)
+# obs[0] is image from agent camera
+# obs[1] is image from third-person camera (for recording)
+# obs[2] is a 12-dim vector: [:3] is raycast; [3:6] is velocity; [6:9] is angular velocity; 
+#                            [9:12] is landing zone position (zeros if not enabled)
 obs = env.reset()
 dist_curr = process_ray(obs[2])
 im0 = axes[0].imshow(obs[0])
@@ -133,7 +153,7 @@ while not done:
     key_ws = np.array([False] * 2)
 
     # step in environment
-    import pdb; pdb.set_trace()
+    act = np.array([0, act, 0, 0, 0, 0]) # NOTE: torque not ready yet; DON'T USE IT
     obs, _, _, _ = env.step(act)
     img0 = obs[0]
     img1 = obs[1]
@@ -143,7 +163,7 @@ while not done:
     if False: # sanity check
         # current environment lock motion of x and z axes
         dt = 1. / UNITY_STEP_FREQ
-        acc = act * thrust_multiplier / mass
+        acc = act * config.control_multiplier / config.mass
         next_velo_y = velo[1] + (GRAVITY + acc) * dt
         velo_y_err = np.absolute(next_velo_y - obs[2][4])
 
@@ -153,10 +173,14 @@ while not done:
 
         print("Velocity error (y-axis) = {}, Distance error = {}".format(velo_y_err, dist_err))
     
-    velo = obs[2][3:]
     distance_to_ground = process_ray(obs[2])
-    axes[0].set_title("Velocity = ({:.2f}, {:.2f}, {:.2f})\n Distance to Ground: {:.8f}".format(\
-                      *velo, distance_to_ground))
+    velo = obs[2][3:6]
+    ang_velo = obs[2][6:9]
+    if config.landing_zone.enable:
+        to_landing_zone = obs[9:]
+    axes[0].set_title("Velocity = ({:.2f}, {:.2f}, {:.2f})\n".format(*velo) + 
+                      "Angular Velocity = ({:.2f}, {:.2f}, {:.2f})\n".format(*ang_velo) +
+                      "Distance to Ground: {:.8f}".format(distance_to_ground))
 
     # example of resetting environment
     if False:
