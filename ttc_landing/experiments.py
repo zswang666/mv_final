@@ -91,7 +91,11 @@ def run_experiment(env, logger_kwargs={'base_dir': 'tmp'}, controller_kwargs={})
     controller = TTCController(**controller_kwargs)
 
     while not done:
-        act, ctrl_info = controller.step(obs[0])
+        if controller.use_oracle:
+            gt_ttc = obs[-1] / -obs[2][4] * 50
+            act, ctrl_info = controller.step(obs[0], gt_ttc)
+        else:
+            act, ctrl_info = controller.step(obs[0])
         obs, _, _, _ = env.step(act)
         
         # For logging

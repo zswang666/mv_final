@@ -13,7 +13,8 @@ class TTCController(object):
             smooth_window=10,
             max_velocity=1.0,
             velocity_limit=0,
-            disable_control=False # For showing freefall
+            disable_control=False, # For showing freefall
+            use_oracle=False
         ):
         self.a = a
         self.downsample_size = downsample_size
@@ -22,7 +23,8 @@ class TTCController(object):
         self.velocity_limit = velocity_limit
         self.disable_control = disable_control
         self.recent_ttcs = deque(maxlen=smooth_window)
-        self.prev_frame = None        
+        self.prev_frame = None      
+        self.use_oracle = use_oracle  
     
     def _preprocess_image(self, obs):
         frame = uniform_blur(restrict(rgb2gray(obs)), self.downsample_size)
@@ -32,11 +34,12 @@ class TTCController(object):
         self.recent_ttcs.clear()
         self.prev_frame = None
 
-    def step(self, img_obs):
+    def step(self, img_obs, gt_ttc=None):
         frame = self._preprocess_image(img_obs)
         if self.prev_frame is not None:
             try:
                 T, x0, y0, Ex, Ey, Et, v = solve_ttc_multiscale(self.prev_frame, frame)
+                T = T if gt_ttc is None else gt_ttc
                 self.recent_ttcs.append(T)
                 smooth_T = np.mean(self.recent_ttcs)
             
