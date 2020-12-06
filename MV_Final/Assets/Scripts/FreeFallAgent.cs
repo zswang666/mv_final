@@ -178,6 +178,7 @@ public class FreeFallAgent : Agent
 
         // cloud shadow
         m_Light.GetComponent<EntroPi.CloudShadows>().enabled = m_ResetParams.GetWithDefault("cloud_shadow.enable", 0.0f) > 0.0f;
+        m_Light.GetComponent<EntroPi.CloudShadows>().WorldSize = m_ResetParams.GetWithDefault("cloud_shadow.world_size", 500.0f);
         m_Light.GetComponent<EntroPi.CloudShadows>().SpeedMultiplier = m_ResetParams.GetWithDefault("cloud_shadow.speed_multiplier", 5.0f);
         m_Light.GetComponent<EntroPi.CloudShadows>().CoverageModifier = m_ResetParams.GetWithDefault("cloud_shadow.coverage_modifier", 0.0f);
 

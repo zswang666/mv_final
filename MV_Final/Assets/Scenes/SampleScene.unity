@@ -240,7 +240,7 @@ Light:
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
-  m_CookieSize: 100
+  m_CookieSize: 500
   m_Shadows:
     m_Type: 2
     m_Resolution: -1
@@ -314,7 +314,7 @@ MonoBehaviour:
   m_PreviewInEditor: 1
   m_ProjectMode: 0
   m_CloudLayers: {fileID: 11400000, guid: 33b8a549f70d3d340ac1c0eca48b64a3, type: 2}
-  m_WorldSize: 100
+  m_WorldSize: 500
   m_RenderTextureResolution: 4096
   m_OpacityMultiplier: 1
   m_CoverageModifier: 0

@@ -31,7 +31,7 @@ def main(args):
 
     # Plot ttc
     fig_ttc, ax_ttc = plt.subplots()
-    plot_ttc(logfile, ax=ax_ttc, ylim=(0, 200))
+    plot_ttc(logfile, ax=ax_ttc, ylim=(0, 1000))
     fig_ttc.savefig(os.path.join(args.logdir, 'ttc.jpg'))
 
     # Plot derivatives

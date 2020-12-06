@@ -57,6 +57,8 @@ class TTCController(object):
             ctrl_info = {'valid': False, 'TTC': np.inf}
 
         self.prev_frame = frame
+
+        act = np.array([0, act, 0, 0, 0, 0]) # no x,z and rotation control
         
         return act, ctrl_info
 

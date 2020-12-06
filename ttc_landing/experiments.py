@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from attrdict import AttrDict
+import cv2
 
 from mlagents_envs.environment import UnityEnvironment
 from gym_unity.envs import UnityToGymWrapper
@@ -51,22 +52,32 @@ class ExperimentLogger(object):
         self.Eys.append(Ey)
         self.Ets.append(Et)
 
-    def _save(self, path, obj):
-        with open(os.path.join(self.base_dir, path), 'wb') as f:
-            pickle.dump(obj, f)
+    def _save(self, path, obj, is_anim=False):
+        if is_anim:
+            out_path = os.path.join(self.base_dir, path)
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            assert os.path.splitext(out_path)[-1] == '.mp4'
+            out = cv2.VideoWriter(out_path, fourcc, 50.0, (obj[0].width, obj[0].height))
+            for frame in obj: 
+                frame = np.array(frame)[:,:,:3][:,:,::-1]
+                out.write(frame)
+            out.release()
+        else:
+            with open(os.path.join(self.base_dir, path), 'wb') as f:
+                pickle.dump(obj, f)
             
     def close_and_save(self):
-        self._save('views.npy', (self.views))
+        self._save('views.mp4', (self.views), is_anim=True)
         self._save('Exs.npy', (self.Exs))
         self._save('Eys.npy', (self.Eys))
-        self._save('Ets.npy', (self.Ets))   
+        self._save('Ets.npy', (self.Ets))
 
 def run_experiment(env, logger_kwargs={'base_dir': 'tmp'}, controller_kwargs={}):
     assert isinstance(env, MatplotlibWrapper)
 
     logger = ExperimentLogger(**logger_kwargs)
 
-    fig, ax = env.fig, env.ax 
+    fig, axes = env.fig, env.axes 
 
     obs = env.reset()
 
@@ -84,11 +95,11 @@ def run_experiment(env, logger_kwargs={'base_dir': 'tmp'}, controller_kwargs={})
         obs, _, _, _ = env.step(act)
         
         # For logging
-        velocity = obs[1][3:]
+        velocity = obs[2][3:6]
         distance_to_ground = obs[-1]
-        ax.set_title("Velocity = ({:.2f}, {:.2f}, {:.2f})\n Distance to Ground: {:.8f} TTC = {:.3f}".format(\
+        fig.suptitle("Velocity = ({:.2f}, {:.2f}, {:.2f})\n Distance to Ground: {:.8f}\n TTC = {:.3f}".format(\
             *velocity, distance_to_ground, ctrl_info['TTC']))
-        
+
         if ctrl_info['valid']:
             TTC = ctrl_info['TTC']
             x0, y0 = ctrl_info['x0'], ctrl_info['y0'] # FoE
@@ -103,13 +114,14 @@ def run_experiment(env, logger_kwargs={'base_dir': 'tmp'}, controller_kwargs={})
             if foe_marker is not None:
                 foe_marker.remove()
 
-            foe_marker = ax.annotate('X', 
-                                    (x0+(n)/2, y0+(m)/2), 
-                                    textcoords="offset points", 
-                                    xytext=(0,0), 
-                                    color='r',
-                                    ha='center')
-            
+            foe_marker = axes[0].annotate('X', 
+                                          (x0+(n)/2, y0+(m)/2), 
+                                          textcoords="offset points", 
+                                          xytext=(0,0), 
+                                          color='r',
+                                          ha='center')
+        
+        env.update_fig() # sync text and image update
         
         timestep += 1
 
